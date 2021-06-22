@@ -3,6 +3,13 @@
 #include<math.h>
 #include<iostream>
 #include<vector>
+#include<fstream>
+#include<stack>
+#include<string>
+#include<cstdlib>
+#include<time.h>
+#include<algorithm>
+#include "1605022_classes.h"
 
 #include <windows.h>
 #include <GL/glut.h>
@@ -15,36 +22,28 @@ double cameraAngle;
 int drawgrid;
 int drawaxes;
 double angle;
-double wall_side;
-double wall_y;
-double sphere_radius,small_sphere_radius,barrel_height;
-int color;
-double deg;
-double rbullet_color,gbullet_color,bbullet_color;
-double whole_part_rotate,whole_part_except_leftHem_rotate,barrel_rotator_1,barrel_rotator_2;
-int check=0;
+//double wall_side;
+//double wall_y;
+//double sphere_radius,small_sphere_radius,barrel_height;
+
+//notun kore lekha variables
+ifstream scene("F:\\Graphics Offlines\\offline 3\\1605022\\scene.txt");
+
+vector <Object> objects;
+vector <Light> lights;
+
+int level_of_recursion,pixels_along_both_dimensions;
+
+int no_of_objects,light_sources;
 
 
-
-struct point
-{
-	double x,y,z;
-};
-
-struct gun_point
-{
-    double x,y,z,w;
-
-};
 
 
 struct point pos,u,l,r;
 
 
-struct point vec;
 
-struct gun_point v;
-vector<gun_point> guns_and_glory;
+
 
 
 struct point cross_gun(struct point p1,struct point p2)
@@ -186,7 +185,7 @@ void drawGrid()
 
 
 
-void drawWall(double a)
+/*void drawWall(double a)
 {
 
 	glBegin(GL_QUADS);{
@@ -195,10 +194,10 @@ void drawWall(double a)
 		glVertex3f(-a,wall_y,-a);
 		glVertex3f(-a,wall_y,a);
 	}glEnd();
-}
+}*/
 
 
-void drawCircle(double radius,int segments)
+/*void drawCircle(double radius,int segments)
 {
     int i;
     struct point points[100];
@@ -219,8 +218,8 @@ void drawCircle(double radius,int segments)
         glEnd();
     }
 }
-
-void drawRest(double radius , int segments)
+*/
+/*(void drawRest(double radius , int segments)
 {
 
 
@@ -441,37 +440,6 @@ void drawBarrel(double radius,double height,int slices)
 }
 
 
-void fire(vector<gun_point> v)
-{
-
-  double a=small_sphere_radius/4;
-
-  for (auto i = v.begin(); i != v.end(); ++i){
-       struct gun_point g=*i;
-
- glPushMatrix();
-  {
-    glRotatef(g.x , 0 , 0 , 1);
-    glRotatef(g.y , 1 , 0 , 0);
-    glTranslatef(vec.x,vec.y,vec.z);
-    glRotatef(g.z , 1 , 0 , 0);
-    glRotatef(g.w , 0 , 1 , 0);
-
-     glColor3f(1,0,0);
-   glBegin(GL_QUADS);
-   {
-		glVertex3f( a, 0,a);
-		glVertex3f( a,0,-a);
-		glVertex3f(-a,0,-a);
-		glVertex3f(-a,0,a);
-	}
-    glEnd();
-  }
-   glPopMatrix();
-  }
-
-}
-
 void drawSS()
 {
    /* glColor3f(1,0,0);
@@ -498,9 +466,10 @@ void drawSS()
     glRotatef(4*angle,0,0,1);
     glColor3f(1,1,0);
     drawSquare(5);
-    */
+
 }
 
+*/
 void keyboardListener(unsigned char key, int x,int y){
 	switch(key){
 
@@ -522,55 +491,6 @@ void keyboardListener(unsigned char key, int x,int y){
 		case '6':
 		    RotateRU(-1);
 			break;
-	/*	case 'a':
-		    if(barrel_rotator_1!=12)
-            {
-                barrel_rotator_1+=1;
-
-
-            }
-
-            break;
-        case 's':
-		    if(barrel_rotator_1!=-12){
-                barrel_rotator_1-=1;
-		    }
-            break;
-
-        case 'd':
-		    if(barrel_rotator_2!=-45){
-                barrel_rotator_2-=1;
-		    }
-            break;
-
-         case 'f':
-		    if(barrel_rotator_2!=45){
-                barrel_rotator_2+=1;
-		    }
-            break;
-
-        case 'q':
-            if(whole_part_rotate!=45){
-            whole_part_rotate+=1;
-
-            }
-            break;
-        case 'w':
-            if(whole_part_rotate!=-45){
-            whole_part_rotate-=1;
-            }
-            break;
-         case 'e':
-            if(whole_part_except_leftHem_rotate!=45){
-            whole_part_except_leftHem_rotate+=1;
-            }
-            break;
-        case 'r':
-            if(whole_part_except_leftHem_rotate!=-45){
-            whole_part_except_leftHem_rotate-=1;
-
-            }
-            break;*/
 
 		default:
 			break;
@@ -636,15 +556,6 @@ void specialKeyListener(int key, int x,int y){
 void mouseListener(int button, int state, int x, int y){	//x, y is the x-y of the screen (2D)
 	switch(button){
 		case GLUT_LEFT_BUTTON:
-			if(state == GLUT_DOWN){
-                    printf("%f %f %f\n",vec.x,vec.y,vec.z);
-                    v.x=whole_part_rotate;
-                    v.y=whole_part_except_leftHem_rotate;
-                    v.z=barrel_rotator_1;
-                    v.w=barrel_rotator_2;
-            guns_and_glory.push_back(v);
-
-			}
 			break;
 
 		case GLUT_RIGHT_BUTTON:
@@ -781,6 +692,441 @@ void display(){
 	glutSwapBuffers();
 }
 
+void skipNFileLines(int N)
+{
+
+    string s;
+    s.reserve(30);
+
+   //skip N lines
+    for(int i = 0; i < N; ++i)
+        getline(scene, s);
+
+
+}
+
+void loadData()
+{
+    string object_type;
+    string fileLine;
+
+    getline(scene,fileLine);
+    size_t pos = 0;
+    pos = fileLine.find(" ");
+    cout<<fileLine.substr(0,pos);
+    level_of_recursion = stoi(fileLine.substr(0,pos));
+
+    cout<<level_of_recursion<<endl;
+
+    getline(scene,fileLine);
+    pos = 0;
+    pos = fileLine.find(" ");
+    pixels_along_both_dimensions = stoi(fileLine.substr(0,pos));
+    cout<<pixels_along_both_dimensions<<endl;
+
+
+    skipNFileLines(1);
+    getline(scene,fileLine);
+    pos = fileLine.find(" ");
+    no_of_objects= stoi(fileLine.substr(0,pos));
+
+    cout<<no_of_objects<<endl;
+
+    for(int obj_count=1;obj_count<=no_of_objects;obj_count++)
+    {
+        getline(scene,fileLine);
+        pos = fileLine.find(" ");
+        object_type= fileLine.substr(0,pos);
+        cout<<object_type<<endl;
+
+        if(object_type=="sphere")
+        {
+            Vector3D center;
+            double radius;
+            double color[3];
+            double coEfficients[4];
+            int shine;
+
+            //take center
+
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            center.x= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            center.y= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            center.z= stod(fileLine.substr(0,pos));
+
+            //take radius
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            radius= stod(fileLine.substr(0,pos));
+
+            //take color
+
+
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            color[0]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            color[1]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            color[2]= stod(fileLine.substr(0,pos));
+
+            //take coeff
+
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            coEfficients[0]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            coEfficients[1]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            coEfficients[2]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            coEfficients[3] = stod(fileLine.substr(0,pos));
+
+            //take shine
+
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            shine= stod(fileLine.substr(0,pos));
+
+            Sphere S;
+
+
+            S.center.x=center.x;
+            S.center.y=center.y;
+            S.center.z=center.z;
+
+            S.radius=radius;
+
+            S.coEfficients[0]=coEfficients[0];
+            S.coEfficients[1]=coEfficients[1];
+            S.coEfficients[2]=coEfficients[2];
+            S.coEfficients[3]=coEfficients[3];
+            S.color[0]=color[0];
+            S.color[1]=color[1];
+            S.color[2]=color[2];
+
+            S.shine=shine;
+
+            objects.push_back(S);
+
+            printSphere(S);
+
+            skipNFileLines(1);
+
+
+
+
+
+        }
+        else if(object_type=="triangle")
+        {
+            cout<<"t te dhukse"<<endl;
+            struct point trianglePoints[3];
+            double color[3];
+            double coEfficients[4];
+            int shine;
+            for(int i=0;i<3;i++)
+            {
+
+                getline(scene,fileLine);
+                pos = 0;
+                pos = fileLine.find(" ");
+                double x = stod(fileLine.substr(0,pos));
+                fileLine.erase(0, pos + 1);
+
+                pos = fileLine.find(" ");
+                double y = stod(fileLine.substr(0,pos));
+                fileLine.erase(0, pos + 1);
+
+                pos = fileLine.find(" ");
+                double z = stod(fileLine.substr(0,pos));
+
+                trianglePoints[i].x=x;
+                trianglePoints[i].y=y;
+                trianglePoints[i].z=z;
+
+
+
+            }
+
+
+            //take color
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            color[0]= stod(fileLine.substr(0,pos));
+            cout<<color[0]<<endl;
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            color[1]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            color[2] = stod(fileLine.substr(0,pos));
+
+            //take coefficients
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            coEfficients[0]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            coEfficients[1]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            coEfficients[2]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            coEfficients[3] = stod(fileLine.substr(0,pos));
+
+            //take shininess
+
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            shine= stod(fileLine.substr(0,pos));
+
+
+
+            Triangle T;
+            T.points[0]=trianglePoints[0];
+            T.points[1]=trianglePoints[1];
+            T.points[2]=trianglePoints[2];
+            T.coEfficients[0]=coEfficients[0];
+            T.coEfficients[1]=coEfficients[1];
+            T.coEfficients[2]=coEfficients[2];
+            T.coEfficients[3]=coEfficients[3];
+            T.color[0]=color[0];
+            T.color[1]=color[1];
+            T.color[2]=color[2];
+
+            T.shine=shine;
+
+            objects.push_back(T);
+
+            printTriangle(T);
+
+            skipNFileLines(1);
+
+
+
+
+
+        }
+        else if(object_type=="general")
+        {
+
+            cout<<"general e dhukse"<<endl;
+            General G;
+
+            //take A B C D...
+
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            G.A= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.B= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.C= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.D= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.E= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.F= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.G= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.H= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.I= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.J= stod(fileLine.substr(0,pos));
+
+            //take habijabi
+
+
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            G.cube_reference_point.x= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.cube_reference_point.y= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.cube_reference_point.z= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.length= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.width= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.height= stod(fileLine.substr(0,pos));
+
+
+             //take color
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            G.color[0]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.color[1]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.color[2] = stod(fileLine.substr(0,pos));
+
+            //take coefficients
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            G.coEfficients[0]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.coEfficients[1]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.coEfficients[2]= stod(fileLine.substr(0,pos));
+            fileLine.erase(0, pos + 1);
+
+            pos = fileLine.find(" ");
+            G.coEfficients[3] = stod(fileLine.substr(0,pos));
+
+            //take shininess
+
+            getline(scene,fileLine);
+            pos = 0;
+            pos = fileLine.find(" ");
+            G.shine= stod(fileLine.substr(0,pos));
+
+            printGeneral(G);
+            objects.push_back(G);
+            skipNFileLines(1);
+
+
+
+        }
+
+
+        else
+        {
+
+
+        }
+
+    }
+
+    //take light sources
+    getline(scene,fileLine);
+    pos = 0;
+    pos = fileLine.find(" ");
+    light_sources= stoi(fileLine.substr(0,pos));
+
+    cout<<light_sources<<endl;
+
+
+    //take light sources attribute
+
+    for(int i=1;i<=light_sources;i++)
+    {
+        Light L;
+
+        //take position
+        getline(scene,fileLine);
+        pos = 0;
+        pos = fileLine.find(" ");
+        L.light_pos.x=stod(fileLine.substr(0,pos));
+        fileLine.erase(0, pos + 1);
+
+        pos = fileLine.find(" ");
+        L.light_pos.y= stod(fileLine.substr(0,pos));
+        fileLine.erase(0, pos + 1);
+
+        pos = fileLine.find(" ");
+        L.light_pos.z= stod(fileLine.substr(0,pos));
+
+        //take color
+
+        getline(scene,fileLine);
+        pos = 0;
+        pos = fileLine.find(" ");
+        L.color[0]=stod(fileLine.substr(0,pos));
+        fileLine.erase(0, pos + 1);
+
+        pos = fileLine.find(" ");
+        L.color[1]= stod(fileLine.substr(0,pos));
+        fileLine.erase(0, pos + 1);
+
+        pos = fileLine.find(" ");
+        L.color[2]= stod(fileLine.substr(0,pos));
+
+        lights.push_back(L);
+        printLight(L);
+
+    }
+
+    scene.close();
+
+
+}
+
 
 
 void init(){
@@ -791,7 +1137,7 @@ void init(){
 	cameraAngle=1.0;
 	angle=0.02;
 
-	wall_side=200.0;
+/*	wall_side=200.0;
 	wall_y=300.0;
 	sphere_radius=30.0;
 	small_sphere_radius=10.0;
@@ -804,7 +1150,7 @@ void init(){
 
 	whole_part_except_leftHem_rotate=0;
 	barrel_rotator_1=0;
-	barrel_rotator_2=0;
+	barrel_rotator_2=0;*/
 
 
 	pos.x=100;
@@ -823,9 +1169,6 @@ void init(){
     r.y=(1)/sqrt(2);
     r.z=0;
 
-    vec.x=sphere_radius/4;
-    vec.y=wall_side+30;
-    vec.z=sphere_radius/4;
 
 
 
@@ -858,6 +1201,7 @@ int main(int argc, char **argv){
 
 	glutCreateWindow("My OpenGL Program");
 	init();
+	loadData();
 
 	glEnable(GL_DEPTH_TEST);	//enable Depth Testing
 

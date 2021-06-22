@@ -13,12 +13,40 @@
 	<GL/gl.h>
 	<GL/glu.h>
 
-1616233943 source:f:\graphics offlines\offline 3\1605022\main.cpp
+1624390205 source:f:\graphics offlines\offline 3\1605022\main.cpp
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
 	<iostream>
 	<vector>
+	<fstream>
+	<stack>
+	<string>
+	<cstdlib>
+	<time.h>
+	<algorithm>
+	"1605022_classes.h"
 	<windows.h>
 	<GL/glut.h>
+
+1624390248 f:\graphics offlines\offline 3\1605022\1605022_classes.h
+	<iostream>
+
+1624376415 source:f:\graphics offlines\offline 3\1605022_1\main.cpp
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<iostream>
+	<vector>
+	<fstream>
+	<stack>
+	<string>
+	<cstdlib>
+	<time.h>
+	<algorithm>
+	"1605022_classes.h"
+	<windows.h>
+	<GL/glut.h>
+
+1624371378 f:\graphics offlines\offline 3\1605022_1\1605022_classes.h
 
