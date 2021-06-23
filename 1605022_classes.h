@@ -93,6 +93,45 @@ class Sphere :public Object
     }
     void draw()
     {
+        glTranslatef(reference_point.x, reference_point.y, reference_point.z);
+        struct point points[100][100];
+        int i,j;
+        double h,r;
+        double stacks=60;
+        double slices=20;
+
+        //generate points
+        for(i=0;i<=stacks;i++)
+        {
+            h=length*sin(((double)i/(double)stacks)*(pi/2));
+            r=length*cos(((double)i/(double)stacks)*(pi/2));
+            for(j=0;j<=slices;j++)
+            {
+                points[i][j].x=r*cos(((double)j/(double)slices)*2*pi);
+                points[i][j].y=r*sin(((double)j/(double)slices)*2*pi);
+                points[i][j].z=h;
+            }
+        }
+        //draw quads using generated points
+        for(i=0;i<stacks;i++)
+        {
+            glColor3f(color[0],color[1],color[2]);
+            for(j=0;j<slices;j++)
+            {
+                glBegin(GL_QUADS);{
+                    //upper hemisphere
+                    glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z);
+                    glVertex3f(points[i][j+1].x,points[i][j+1].y,points[i][j+1].z);
+                    glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,points[i+1][j+1].z);
+                    glVertex3f(points[i+1][j].x,points[i+1][j].y,points[i+1][j].z);
+                    //lower hemisphere
+                    glVertex3f(points[i][j].x,points[i][j].y,-points[i][j].z);
+                    glVertex3f(points[i][j+1].x,points[i][j+1].y,-points[i][j+1].z);
+                    glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,-points[i+1][j+1].z);
+                    glVertex3f(points[i+1][j].x,points[i+1][j].y,-points[i+1][j].z);
+                }glEnd();
+            }
+        }
 
     }
 
@@ -138,6 +177,12 @@ class Triangle :public Object
     Triangle(){};
     void draw()
     {
+        glBegin(GL_TRIANGLES);
+        glColor3f(color[0], color[1], color[2]);
+        glVertex3f(points[0].x, points[0].y, points[0].z);
+        glVertex3f(points[1].x, points[1].y, points[1].z);
+        glVertex3f(points[2].x, points[2].y, points[2].z);
+        glEnd();
 
     }
 
@@ -269,6 +314,18 @@ class Light{
     double color[3];
 
     Light(){};
+
+    void draw()
+    {
+
+        glBegin(GL_POINTS);
+        glColor3f(color[0] ,color[1] ,color[2]);
+
+        glVertex3f(light_pos.x , light_pos.y ,light_pos.z);
+
+        glEnd();
+
+    }
 
     void printLight()
     {

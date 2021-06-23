@@ -9,12 +9,13 @@
 #include<cstdlib>
 #include<time.h>
 #include<algorithm>
-#include "1605022_classes.h"
 
 #include <windows.h>
 #include <GL/glut.h>
 
 #define pi (2*acos(0.0))
+
+#include "1605022_classes.h"
 
 using namespace std;
 double cameraHeight;
@@ -377,7 +378,8 @@ void drawSphere(double radius,int slices,int stacks)
 		for(j=0;j<=slices;j++)
 		{
 			points[i][j].x=r*cos(((double)j/(double)slices)*2*pi);
-			points[i][j].y=r*sin(((double)j/(double)slices)*2*pi);
+			points[i][j].y=r*sin(((
+                        double)j/(double)slices)*2*pi);
 			points[i][j].z=h;
 		}
 	}
@@ -608,77 +610,26 @@ void display(){
 	****************************/
 	//add objects
 
-	//drawAxes();
-	//drawGrid();
+	drawAxes();
 
-
-   // fire(guns_and_glory);
-
-
-
-	//glColor3f(0.6,0.6,0.6);
-	//drawWall(wall_side);
-	//glRotatef(whole_part_rotate , 0 , 0 , 1);
-/*
-	 glPushMatrix();
+    for(int i=0;i<objects.size();i++)
     {
-        glRotatef(90,1,0,0);
-        drawLeftHemisphere(sphere_radius,80,80);
-
+        glPushMatrix();
+        objects[i]->draw();
+        glPopMatrix();
     }
-    glPopMatrix();
 
-    glRotatef(whole_part_except_leftHem_rotate , 1 , 0 , 0);
-
-    glPushMatrix();
+     for(int i=0;i<lights.size();i++)
     {
-        glRotatef(90,1,0,0);
-        drawRightHemisphere(sphere_radius,80,80);
+        glPushMatrix();
+        glPointSize(7);
+        lights[i].draw();
+        glPopMatrix();
     }
-    glPopMatrix();
 
 
-    glRotatef(barrel_rotator_1 , 1 , 0 , 0);
-    glRotatef(barrel_rotator_2 , 0 , 1 , 0);
-
-     glPushMatrix();
-    {
-        glTranslatef(0,sphere_radius,0);
-
-        glRotatef(90,1,0,0);
-        glTranslatef(0,0,-small_sphere_radius);
-        drawLeftHemisphere(small_sphere_radius,80,80);
-
-    }
-    glPopMatrix();
-
-     glPushMatrix();
-    {
-
-        glTranslatef(0,sphere_radius,0);
-        drawBarrel(small_sphere_radius,barrel_height,40);
-    }
-    glPopMatrix();
-
-     glPushMatrix();
-    {
-
-        glTranslatef(0,sphere_radius+small_sphere_radius,0);
-
-        drawRest(small_sphere_radius,40);
-    }
-    glPopMatrix();*/
 
 
-   /*glPushMatrix();
-    {
-    glTranslatef(vec.x,vec.y,vec.z);
-
-    }*/
-  //  glPopMatrix();
-
-    //glColor3f(rbullet_color,gbullet_color,bbullet_color);
-	//fire();
 
 
 
