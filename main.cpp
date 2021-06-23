@@ -29,7 +29,7 @@ double angle;
 //notun kore lekha variables
 ifstream scene("F:\\Graphics Offlines\\offline 3\\1605022\\scene.txt");
 
-vector <Object> objects;
+vector <Object*> objects;
 vector <Light> lights;
 
 int level_of_recursion,pixels_along_both_dimensions;
@@ -810,29 +810,18 @@ void loadData()
             pos = fileLine.find(" ");
             shine= stod(fileLine.substr(0,pos));
 
-            Sphere S;
+            Object *S;
 
+            S=new Sphere(center,radius);
 
-            S.center.x=center.x;
-            S.center.y=center.y;
-            S.center.z=center.z;
+            S->setCoEfficients(coEfficients[0],coEfficients[1],coEfficients[2],coEfficients[3]);
+            S->setColor(color[0],color[1],color[2]);
 
-            S.radius=radius;
-
-            S.coEfficients[0]=coEfficients[0];
-            S.coEfficients[1]=coEfficients[1];
-            S.coEfficients[2]=coEfficients[2];
-            S.coEfficients[3]=coEfficients[3];
-            S.color[0]=color[0];
-            S.color[1]=color[1];
-            S.color[2]=color[2];
-
-            S.shine=shine;
+            S->setShine(shine);
 
             objects.push_back(S);
 
-            printSphere(S);
-
+           // S->print();
             skipNFileLines(1);
 
 
@@ -843,7 +832,7 @@ void loadData()
         else if(object_type=="triangle")
         {
             cout<<"t te dhukse"<<endl;
-            struct point trianglePoints[3];
+            struct Vector3D trianglePoints[3];
             double color[3];
             double coEfficients[4];
             int shine;
@@ -914,24 +903,23 @@ void loadData()
 
 
 
-            Triangle T;
-            T.points[0]=trianglePoints[0];
-            T.points[1]=trianglePoints[1];
-            T.points[2]=trianglePoints[2];
-            T.coEfficients[0]=coEfficients[0];
-            T.coEfficients[1]=coEfficients[1];
-            T.coEfficients[2]=coEfficients[2];
-            T.coEfficients[3]=coEfficients[3];
-            T.color[0]=color[0];
-            T.color[1]=color[1];
-            T.color[2]=color[2];
+            Object *T;
+          /*  for(int i=0;i<3;i++)
+            {
+                cout<<trianglePoints[i].x<<" "<<trianglePoints[i].y<<" "<<trianglePoints[i].z<<endl;
 
-            T.shine=shine;
+            }*/
+
+            T=new Triangle(trianglePoints);
+
+            T->setCoEfficients(coEfficients[0],coEfficients[1],coEfficients[2],coEfficients[3]);
+            T->setColor(color[0],color[1],color[2]);
+
+            T->setShine(shine);
 
             objects.push_back(T);
 
-            printTriangle(T);
-
+            //T->print();
             skipNFileLines(1);
 
 
@@ -943,50 +931,57 @@ void loadData()
         {
 
             cout<<"general e dhukse"<<endl;
-            General G;
+
+            double A,B,C,D,E,F,G,H,I,J;
+            Vector3D reference_point;
+            double height,width,length;
+            double color[3];
+            double coEfficients[4];
+            int shine;
+
 
             //take A B C D...
 
             getline(scene,fileLine);
             pos = 0;
             pos = fileLine.find(" ");
-            G.A= stod(fileLine.substr(0,pos));
+            A= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.B= stod(fileLine.substr(0,pos));
+            B= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.C= stod(fileLine.substr(0,pos));
+            C= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.D= stod(fileLine.substr(0,pos));
+            D= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.E= stod(fileLine.substr(0,pos));
+            E= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.F= stod(fileLine.substr(0,pos));
+            F= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.G= stod(fileLine.substr(0,pos));
+            G= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.H= stod(fileLine.substr(0,pos));
+            H= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.I= stod(fileLine.substr(0,pos));
+            I= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.J= stod(fileLine.substr(0,pos));
+            J= stod(fileLine.substr(0,pos));
 
             //take habijabi
 
@@ -994,70 +989,83 @@ void loadData()
             getline(scene,fileLine);
             pos = 0;
             pos = fileLine.find(" ");
-            G.cube_reference_point.x= stod(fileLine.substr(0,pos));
+            reference_point.x= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.cube_reference_point.y= stod(fileLine.substr(0,pos));
+            reference_point.y= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.cube_reference_point.z= stod(fileLine.substr(0,pos));
+            reference_point.z= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.length= stod(fileLine.substr(0,pos));
+            length= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.width= stod(fileLine.substr(0,pos));
+            width= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.height= stod(fileLine.substr(0,pos));
+            height= stod(fileLine.substr(0,pos));
 
 
              //take color
             getline(scene,fileLine);
             pos = 0;
             pos = fileLine.find(" ");
-            G.color[0]= stod(fileLine.substr(0,pos));
+            color[0]= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.color[1]= stod(fileLine.substr(0,pos));
+            color[1]= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.color[2] = stod(fileLine.substr(0,pos));
+            color[2] = stod(fileLine.substr(0,pos));
 
             //take coefficients
             getline(scene,fileLine);
             pos = 0;
             pos = fileLine.find(" ");
-            G.coEfficients[0]= stod(fileLine.substr(0,pos));
+            coEfficients[0]= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.coEfficients[1]= stod(fileLine.substr(0,pos));
+            coEfficients[1]= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.coEfficients[2]= stod(fileLine.substr(0,pos));
+            coEfficients[2]= stod(fileLine.substr(0,pos));
             fileLine.erase(0, pos + 1);
 
             pos = fileLine.find(" ");
-            G.coEfficients[3] = stod(fileLine.substr(0,pos));
+            coEfficients[3] = stod(fileLine.substr(0,pos));
 
             //take shininess
 
             getline(scene,fileLine);
             pos = 0;
             pos = fileLine.find(" ");
-            G.shine= stod(fileLine.substr(0,pos));
+            shine= stod(fileLine.substr(0,pos));
 
-            printGeneral(G);
-            objects.push_back(G);
+            Object *g;
+
+            g=new General(A,B,C,D,E,F,G,H,I,J);
+
+            g->setCoEfficients(coEfficients[0],coEfficients[1],coEfficients[2],coEfficients[3]);
+            g->setColor(color[0],color[1],color[2]);
+            g->setLength(length);
+            g->setHeight(height);
+            g->setWidth(width);
+
+            g->setShine(shine);
+
+            objects.push_back(g);
+
+           // g->print();
             skipNFileLines(1);
 
 
@@ -1070,6 +1078,7 @@ void loadData()
 
 
         }
+
 
     }
 
@@ -1118,9 +1127,29 @@ void loadData()
         L.color[2]= stod(fileLine.substr(0,pos));
 
         lights.push_back(L);
-        printLight(L);
+        //L.printLight();
 
     }
+
+    Object *F;
+    F=new Floor(700,20);
+
+    F->setCoEfficients(0.1,0.2,0.3,0.4);
+    F->setColor(0.3,0.4,0.5);
+
+    F->setShine(7);
+
+    objects.push_back(F);
+
+
+    for(int i=0;i<objects.size();i++)
+    {
+
+        objects[i]->print();
+    }
+
+
+
 
     scene.close();
 
