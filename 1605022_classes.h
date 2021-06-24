@@ -228,6 +228,25 @@ class Floor :public Object
     void draw()
     {
 
+        for(double var_along_x=reference_point.x ; var_along_x<=floorWidth/2 ; var_along_x+=length)
+        {
+            for(double var_along_y=reference_point.y ; var_along_y<=floorWidth/2 ; var_along_y+=length)
+            {
+
+                glBegin(GL_QUADS);
+                {
+                    glColor3f(color[0],color[1],color[2]);
+                    glVertex3f(var_along_x, var_along_y , 0);
+                    glVertex3f(var_along_x , var_along_y+length , 0);
+                    glVertex3f(var_along_x+length , var_along_y+length , 0);
+                    glVertex3f(var_along_x+length , var_along_y , 0);
+                }
+                glEnd();
+                if(color[0]==0.3) setColor(0.7,0.8,0.9);
+                else setColor(0.3,0.4,0.5);
+            }
+        }
+
     }
 
     void print()
