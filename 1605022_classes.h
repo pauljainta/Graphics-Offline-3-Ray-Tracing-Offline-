@@ -7,16 +7,16 @@ double QuadraticEqnSolution(double a,double b,double c)
 
      if (discriminant >= 0)
      {
-        double numerator=-b - sqrt(discriminant);
-        if(numerator>0)
+        double n=-b - sqrt(discriminant);
+        if(n>0)
         {
-            return numerator/(2*a);
+            return n/(2*a);
         }
-        numerator=-b + sqrt(discriminant);
+        n=-b + sqrt(discriminant);
 
-        if(numerator>0)
+        if(n>0)
         {
-            return numerator/(2*a);
+            return n/(2*a);
         }
 
      }
@@ -151,6 +151,13 @@ struct point
 
 };
 
+Vector3D VectorFromPoint(struct point p)
+{
+    Vector3D v(p.x,p.y,p.z);
+    return v;
+
+}
+
 class Object
 {
     public:
@@ -161,7 +168,7 @@ class Object
     int shine; // exponent term of specular component
     Object(){};
     virtual void draw(){};
-    virtual double intersect(Ray){};
+    virtual double intersect(Ray,double*,int){};
     void setColor(double R,double G,double B)
     {
         color[0]=R;
@@ -256,7 +263,7 @@ class Sphere :public Object
 
     }
 
-    double intersect(Ray ray)
+    double intersect(Ray ray,double* color,int r_level)
     {
         Vector3D vector_from_center_to_ray = VecAddition(ray.start,reference_point,-1);
 
@@ -436,7 +443,7 @@ class Floor :public Object
 
     }
 
-   double intersect(Ray ray)
+   double intersect(Ray ray,double* color,int r_level)
     {
             Vector3D origin(0, 0, 0);
             Vector3D normal(0, 0, 1);
@@ -529,11 +536,122 @@ class General :public Object
 
     }
 
-    double intersect(Ray ray)
+    double intersect(Ray ray,double* color,int r_level)
     {
-        return -1000;
-    }
+        double rx = ray.start.x;
+        double ry = ray.start.y;
+        double rz = ray.start.z;
 
+        double dx = ray.dir.x;
+        double dy = ray.dir.y;
+        double dz = ray.dir.z;
+
+        double a = A*dx*dx + B*dy*dy + C*dz*dz + D*dx*dy + E*dy*dz + F*dz*dx;
+
+        double b = 2*(A*rx*dx + B*ry*dy + C*rz*dz)
+                 + D*(rx*dy + ry*dx) + E*(ry*dz + rz*dy) +  F*(rz*dx + rx*dz)
+                 + G*dx + H*dy + I*dz;
+
+        double c = A*rx*rx + B*ry*ry + C*rz*rz
+                 + D*rx*ry + E*ry*rz + F*rz*rx
+                 + G*rx + H*ry + I*rz + J;
+
+
+
+
+        return QuadraticEqnSolution(a,b,c);
+
+
+      /*  double discriminant = b*b - 4*a*c;
+
+
+        if(discriminant < 0.0)
+        {
+            return -1.0;
+        }
+
+        double numerator1 = -b - sqrt(discriminant);
+        double numerator2 = -b + sqrt(discriminant);
+
+        double t1 = numerator1/(2.0 * a);
+        double t2 = numerator2/(2.0 * a);
+
+
+        double t = -1.0;
+
+        if(t1 < 0 && t2 < 0)
+        {
+            return -1.0;
+        }
+
+        if(t1 < 0)
+        {
+            t = t2;
+        }
+
+        if(t2 < 0)
+        {
+            t = t1;
+        }
+
+        if(t1 >= 0 && t2 >= 0)
+        {
+            Point intersecting_point1(rx + t1*dx, ry + t1*dy, rz + t1*dz);
+            Point intersecting_point2(rx + t2*dx, ry + t2*dy, rz + t2*dz);
+
+            Point temp1 = intersecting_point1.sub(reference_point);
+            Point temp2 = intersecting_point2.sub(reference_point);
+
+            if(length > 0)
+            {
+                if(abs(temp1.x) > length && abs(temp2.x) > length)
+                    return -1.0;
+
+                if(abs(temp1.x) > length)
+                    t = t2;
+
+                else if(abs(temp2.x) > length)
+                    t = t1;
+
+                else
+                    t = min(t1, t2);
+            }
+
+            if(width > 0)
+            {
+                if(abs(temp1.y) > width && abs(temp2.y) > width)
+                    return -1.0;
+
+                if(abs(temp1.y) > width)
+                    t = t2;
+
+                else if(abs(temp2.y) > width)
+                    t = t1;
+
+                else
+                    t = min(t1, t2);
+            }
+
+            if(height > 0)
+            {
+                if(abs(temp1.z) > height && abs(temp2.z) > height)
+                    return -1.0;
+
+                if(abs(temp1.z) > height)
+                    t = t2;
+
+                else if(abs(temp2.z) > height)
+                    t = t1;
+
+                else
+                    t = min(t1, t2);
+            }
+        }
+
+        return t;
+
+*/
+    }
 
 
     void print()

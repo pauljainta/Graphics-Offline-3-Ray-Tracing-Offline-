@@ -15,6 +15,8 @@
 
 #define pi (2*acos(0.0))
 
+#define large_value 999999
+#include "bitmap_image.hpp"
 #include "1605022_classes.h"
 
 using namespace std;
@@ -23,6 +25,7 @@ double cameraAngle;
 int drawgrid;
 int drawaxes;
 double angle;
+double viewAngle=180;
 //double wall_side;
 //double wall_y;
 //double sphere_radius,small_sphere_radius,barrel_height;
@@ -42,7 +45,19 @@ int no_of_objects,light_sources;
 
 struct point pos,u,l,r;
 
+void capture();
 
+
+Vector3D Scale(Vector3D v,double factor)
+{
+	    Vector3D returnVec;
+
+	    returnVec.x = v.x * factor;
+	    returnVec.y = v.y * factor;
+	    returnVec.z = v.z * factor;
+
+	    return returnVec;
+}
 
 
 
@@ -493,6 +508,10 @@ void keyboardListener(unsigned char key, int x,int y){
 		case '6':
 		    RotateRU(-1);
 			break;
+
+		case '7':
+            capture();
+            break;
 
 		default:
 			break;
@@ -1100,7 +1119,7 @@ void loadData()
     for(int i=0;i<objects.size();i++)
     {
 
-        cout<<objects[i]->intersect(r)<<endl;
+        //cout<<objects[i]->intersect(r)<<endl;
     }
 
 
@@ -1176,6 +1195,96 @@ void init(){
 	//near distance
 	//far distance
 }
+
+void capture()
+{
+    double Windowidth=800, Windowheight=800;
+
+    bitmap_image image(Windowidth, Windowheight);
+
+    double planeDistance = (Windowidth/2.0) / (tan((80 * (pi / viewAngle))/2.0));
+
+    Vector3D Scaled_Vector_l = Scale(VectorFromPoint(l),planeDistance);
+
+    Vector3D Scaled_Vector_r = Scale(VectorFromPoint(r),Windowidth*0.5);
+
+    Vector3D Scaled_Vector_u = Scale(VectorFromPoint(u),Windowheight*0.5);
+
+   // Vector3D top_left = pos.add(l_scale_plane).sub(r_scale_width).add(u_scale_height);
+
+    Vector3D top_left = VecAddition(Scaled_Vector_l,VectorFromPoint(pos),1);
+    top_left=VecAddition(top_left,Scaled_Vector_r,-1);
+    top_left=VecAddition(Scaled_Vector_u,top_left,1);
+
+    double du = Windowidth/pixels_along_both_dimensions;
+    double dv = Windowheight/pixels_along_both_dimensions;
+
+    Vector3D  Scaled_Vector_r_du = Scale(VectorFromPoint(r),0.5*du);
+    Vector3D Scaled_Vector_u_dv = Scale(VectorFromPoint(u),0.5*dv);
+
+   // top_left = top_left.add(r_scale_du).sub(u_scale_dv);
+
+    top_left=VecAddition(top_left,Scaled_Vector_r_du,1);
+    top_left=VecAddition(top_left,Scaled_Vector_u_dv,-1);
+
+    int nearest;
+    double t, tMin;
+
+    for(int i=0;i<Windowidth;i++)
+    {
+        for(int j=0;j<Windowheight;j++)
+        {
+            tMin = large_value;
+
+         //   r_scale_du = r.scale(i*du);
+          //  u_scale_dv = u.scale(j*dv);
+
+            //Point current_pixel = top_left.add(r_scale_du).sub(u_scale_dv);
+
+            //current_pixel.print();
+
+            Vector3D curr_pixel=VecAddition(top_left,Scale(VectorFromPoint(r),i*du),1);
+            curr_pixel=VecAddition(curr_pixel,Scale(VectorFromPoint(u),j*dv),-1);
+
+            Vector3D ray_dir=VecAddition(curr_pixel,VectorFromPoint(pos),-1);
+
+            Ray ray(VectorFromPoint(pos), ray_dir);
+            nearest = -1;
+
+            double* color = new double[3];
+            double* dummyColor = new double[3];
+
+            for(int k=0 ; k<objects.size(); k++)
+            {
+                t = objects[k]->intersect(ray , dummyColor , 1);
+
+                if(t > 0 && t < tMin)
+                {
+                    tMin = t;
+                    nearest = k;
+                }
+            }
+
+            if(nearest != -1)
+            {
+                tMin = objects[nearest]->intersect(ray , color , 1);
+
+                image.set_pixel(i,j,color[0]*255,color[1]*255,color[2]*255);
+            }
+        }
+    }
+
+
+
+    //image_count++;
+    string name = "";
+    image.save_image("out"  + name + ".bmp");
+
+    image.clear();
+
+    cout<<"image saved"<<endl;
+}
+
 
 int main(int argc, char **argv){
 	glutInit(&argc,argv);

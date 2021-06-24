@@ -13,7 +13,7 @@
 	<GL/gl.h>
 	<GL/glu.h>
 
-1624543289 source:f:\graphics offlines\offline 3\1605022\main.cpp
+1624551155 source:f:\graphics offlines\offline 3\1605022\main.cpp
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -27,9 +27,10 @@
 	<algorithm>
 	<windows.h>
 	<GL/glut.h>
+	"bitmap_image.hpp"
 	"1605022_classes.h"
 
-1624541826 f:\graphics offlines\offline 3\1605022\1605022_classes.h
+1624550617 f:\graphics offlines\offline 3\1605022\1605022_classes.h
 	<iostream>
 
 1624376415 source:f:\graphics offlines\offline 3\1605022_1\main.cpp
@@ -49,4 +50,14 @@
 	<GL/glut.h>
 
 1624371378 f:\graphics offlines\offline 3\1605022_1\1605022_classes.h
+
+1492200750 f:\graphics offlines\offline 3\1605022\bitmap_image.hpp
+	<algorithm>
+	<cmath>
+	<cstdlib>
+	<fstream>
+	<iostream>
+	<iterator>
+	<limits>
+	<string>
 
