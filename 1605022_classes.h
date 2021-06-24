@@ -1,18 +1,138 @@
 #include<iostream>
 using namespace std;
+double QuadraticEqnSolution(double a,double b,double c)
+{
+
+    double discriminant = b*b - 4*a*c;
+
+     if (discriminant >= 0)
+     {
+        double numerator=-b - sqrt(discriminant);
+        if(numerator>0)
+        {
+            return numerator/(2*a);
+        }
+        numerator=-b + sqrt(discriminant);
+
+        if(numerator>0)
+        {
+            return numerator/(2*a);
+        }
+
+     }
+
+     return -1;
+
+
+}
 struct Vector3D
 {
     double x,y,z;
     Vector3D(){
 
     }
-    Vec(double xx,double yy,double zz)
+    Vector3D(double xx,double yy,double zz)
     {
         x=xx;
         y=yy;
         z=zz;
     }
 };
+
+struct Vector3D crossMultiply(struct Vector3D v1,struct Vector3D v2)
+{
+    struct Vector3D crossProductVec;
+
+    crossProductVec.x = v1.y * v2.z - v1.z * v2.y;
+    crossProductVec.y = v1.z * v2.x - v1.x * v2.z;
+    crossProductVec.z = v1.x * v2.y - v1.y * v2.x;
+
+    return crossProductVec;
+
+
+}
+
+struct Vector3D normalizeVec(struct Vector3D v)
+{
+    Vector3D returnVec;
+    double VecValue=sqrt(pow(v.x,2)+pow(v.y,2)+pow(v.z,2));
+    returnVec.x=v.x/VecValue;
+    returnVec.y=v.y/VecValue;
+    returnVec.z=v.z/VecValue;
+    return returnVec;
+
+}
+
+class Ray{
+    public:
+    Vector3D start;
+    Vector3D dir;
+    Ray(Vector3D s,Vector3D d)
+    {
+
+        start.x=s.x;
+        start.y=s.y;
+        start.z=s.z;
+
+        dir.x=d.x;
+        dir.y=d.y;
+        dir.z=d.z;
+
+        dir=normalizeVec(dir);
+
+    }
+
+    void setStart(Vector3D s)
+    {
+
+        start.x=s.x;
+        start.y=s.y;
+        start.z=s.z;
+    }
+     void setStart(double x,double y,double z)
+    {
+
+        start.x=x;
+        start.y=y;
+        start.z=z;
+    }
+
+    void setDir(Vector3D d)
+    {
+
+        dir.x=d.x;
+        dir.y=d.y;
+        dir.z=d.z;
+    }
+
+    void setDir(double x,double y,double z)
+    {
+
+        dir.x=x;
+        dir.y=y;
+        dir.z=z;
+    }
+
+};
+
+double dotMultiply(struct Vector3D v1, struct Vector3D v2)
+{
+
+    double product = 0;
+    product = product + (v1.x*v2.x)+(v1.y*v2.y)+(v1.z*v2.z);
+    return product;
+}
+
+struct Vector3D VecAddition(struct Vector3D v1,struct Vector3D v2,int addOrSubtract)
+{
+    struct Vector3D returnVec;
+    returnVec.x=v1.x+(addOrSubtract)*v2.x;
+    returnVec.y=v1.y+(addOrSubtract)*v2.y;
+    returnVec.z=v1.z+(addOrSubtract)*v2.z;
+    return returnVec;
+
+
+}
 
 struct point
 {
@@ -41,6 +161,7 @@ class Object
     int shine; // exponent term of specular component
     Object(){};
     virtual void draw(){};
+    virtual double intersect(Ray){};
     void setColor(double R,double G,double B)
     {
         color[0]=R;
@@ -135,6 +256,21 @@ class Sphere :public Object
 
     }
 
+    double intersect(Ray ray)
+    {
+        Vector3D vector_from_center_to_ray = VecAddition(ray.start,reference_point,-1);
+
+
+        double a = dotMultiply(ray.dir,ray.dir);
+
+        double b = 2.0 *dotMultiply(ray.dir,vector_from_center_to_ray);
+
+        double c = dotMultiply(vector_from_center_to_ray,vector_from_center_to_ray) - pow(length,2);
+
+        return QuadraticEqnSolution(a,b,c);
+
+    }
+
     void print()
     {
         cout<<"Center"<<endl;
@@ -157,6 +293,10 @@ class Sphere :public Object
     }
 
 };
+
+
+
+
 
 class Triangle :public Object
 {
@@ -183,6 +323,53 @@ class Triangle :public Object
         glVertex3f(points[1].x, points[1].y, points[1].z);
         glVertex3f(points[2].x, points[2].y, points[2].z);
         glEnd();
+
+    }
+    double intersect(Ray ray)
+    {
+        Vector3D e1 = VecAddition(points[1],points[0],-1);
+        Vector3D e2 = VecAddition(points[2],points[0],-1);
+
+        Vector3D h =crossMultiply(ray.dir,e2);
+
+        double a = dotMultiply(h,e1);
+        if(abs(a)>=0.00001)
+        {
+
+            Vector3D d =VecAddition(ray.start,points[0],-1);
+
+            double alpha = dotMultiply(h,d)/a;
+
+            if (alpha < 0.0 || alpha > 1.0)
+            {
+                return -1.0;
+            }
+
+            Vector3D q = crossMultiply(d,e1);
+
+            double beta =dotMultiply(ray.dir,q)/a;
+
+            if(beta < 0.0 || (alpha+beta) > 1.0)
+            {
+                return -1.0;
+            }
+
+            double t = dotMultiply(q,e2)/a;
+
+            if(t > 0.00001)
+            {
+                return t;
+            }
+
+            return -1;
+
+
+        }
+
+        return -1;
+
+
+
 
     }
 
@@ -249,6 +436,48 @@ class Floor :public Object
 
     }
 
+   double intersect(Ray ray)
+    {
+            Vector3D origin(0, 0, 0);
+            Vector3D normal(0, 0, 1);
+
+
+
+            if(abs(dotMultiply(normal,ray.dir)) > 0.000001)
+            {
+
+               double t = dotMultiply(normal,VecAddition(origin,ray.start,-1))/dotMultiply(normal,ray.dir);
+
+                Vector3D intersecting_point(ray.start.x + t*ray.dir.x, ray.start.y + t*ray.dir.y, 0);
+
+                if( abs(intersecting_point.y) > floorWidth/2 || abs(intersecting_point.x) > floorWidth/2)
+                    return -1.0;
+
+                int row = floor((intersecting_point.x - reference_point.x)/length);
+                int col = floor((intersecting_point.y - reference_point.y)/length);
+
+              /*  if((row+col)%2 == 0)
+                {
+                    for(int i=0;i<3;i++)
+                    {
+                        color[i] = 0.2;
+                    }
+                }
+                else
+                {
+                    for(int i=0;i<3;i++)
+                    {
+                        color[i] = 0.8;
+                    }
+                }*/
+
+                return t;
+        }
+        return -1;
+
+
+    }
+
     void print()
     {
         cout<<"Points"<<endl;
@@ -299,6 +528,13 @@ class General :public Object
     {
 
     }
+
+    double intersect(Ray ray)
+    {
+        return -1000;
+    }
+
+
 
     void print()
     {

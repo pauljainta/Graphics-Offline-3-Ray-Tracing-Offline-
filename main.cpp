@@ -1092,11 +1092,15 @@ void loadData()
 
     objects.push_back(F);
 
+    Vector3D origin(2,2,2);
+    Vector3D dir(11,10,11);
+    Ray r(origin, dir);
+
 
     for(int i=0;i<objects.size();i++)
     {
 
-        objects[i]->print();
+        cout<<objects[i]->intersect(r)<<endl;
     }
 
 
