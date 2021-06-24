@@ -268,11 +268,18 @@ class Sphere :public Object
         Vector3D vector_from_center_to_ray = VecAddition(ray.start,reference_point,-1);
 
 
+
+
         double a = dotMultiply(ray.dir,ray.dir);
 
         double b = 2.0 *dotMultiply(ray.dir,vector_from_center_to_ray);
 
         double c = dotMultiply(vector_from_center_to_ray,vector_from_center_to_ray) - pow(length,2);
+
+        color[0]=this->color[0];
+        color[1]=this->color[1];
+        color[2]=this->color[2];
+
 
         return QuadraticEqnSolution(a,b,c);
 
@@ -332,7 +339,7 @@ class Triangle :public Object
         glEnd();
 
     }
-    double intersect(Ray ray)
+    double intersect(Ray ray,double* color,int l)
     {
         Vector3D e1 = VecAddition(points[1],points[0],-1);
         Vector3D e2 = VecAddition(points[2],points[0],-1);
@@ -340,6 +347,12 @@ class Triangle :public Object
         Vector3D h =crossMultiply(ray.dir,e2);
 
         double a = dotMultiply(h,e1);
+
+
+        color[0]=this->color[0];
+        color[1]=this->color[1];
+        color[2]=this->color[2];
+
         if(abs(a)>=0.00001)
         {
 
@@ -422,9 +435,10 @@ class Floor :public Object
     void draw()
     {
 
-        for(double var_along_x=reference_point.x ; var_along_x<=floorWidth/2 ; var_along_x+=length)
+
+        for(double var_along_y=reference_point.y ; var_along_y<=floorWidth/2 ; var_along_y+=length)
         {
-            for(double var_along_y=reference_point.y ; var_along_y<=floorWidth/2 ; var_along_y+=length)
+            for(double var_along_x=reference_point.x ; var_along_x<=floorWidth/2 ; var_along_x+=length)
             {
 
                 glBegin(GL_QUADS);
@@ -463,7 +477,7 @@ class Floor :public Object
                 int row = floor((intersecting_point.x - reference_point.x)/length);
                 int col = floor((intersecting_point.y - reference_point.y)/length);
 
-              /*  if((row+col)%2 == 0)
+                if((row+col)%2 == 0)
                 {
                     for(int i=0;i<3;i++)
                     {
@@ -476,7 +490,7 @@ class Floor :public Object
                     {
                         color[i] = 0.8;
                     }
-                }*/
+                }
 
                 return t;
         }

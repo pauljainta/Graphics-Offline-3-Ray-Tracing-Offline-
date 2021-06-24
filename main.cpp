@@ -1278,7 +1278,7 @@ void capture()
 
     //image_count++;
     string name = "";
-    image.save_image("out"  + name + ".bmp");
+    image.save_image("F:\\Graphics Offlines\\offline 3\\1605022\\out"  + name + ".bmp");
 
     image.clear();
 
