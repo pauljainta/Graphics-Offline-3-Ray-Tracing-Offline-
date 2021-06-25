@@ -1105,22 +1105,11 @@ void loadData()
     F=new Floor(700,20);
 
     F->setCoEfficients(0.1,0.2,0.3,0.4);
-    F->setColor(0.3,0.4,0.5);
+    F->setColor(0.3,0.3,0.3);
 
     F->setShine(7);
 
     objects.push_back(F);
-
-    Vector3D origin(2,2,2);
-    Vector3D dir(11,10,11);
-    Ray r(origin, dir);
-
-
-    for(int i=0;i<objects.size();i++)
-    {
-
-        //cout<<objects[i]->intersect(r)<<endl;
-    }
 
 
 
@@ -1140,20 +1129,7 @@ void init(){
 	cameraAngle=1.0;
 	angle=0.02;
 
-/*	wall_side=200.0;
-	wall_y=300.0;
-	sphere_radius=30.0;
-	small_sphere_radius=10.0;
-	barrel_height=100.0;
-	color=1;
-	rbullet_color=gbullet_color=bbullet_color=0.6;
-//	right_sphere_rotate=90;
-	whole_part_rotate=0;
 
-
-	whole_part_except_leftHem_rotate=0;
-	barrel_rotator_1=0;
-	barrel_rotator_2=0;*/
 
 
 	pos.x=100;
@@ -1210,7 +1186,6 @@ void capture()
 
     Vector3D Scaled_Vector_u = Scale(VectorFromPoint(u),Windowheight*0.5);
 
-   // Vector3D top_left = pos.add(l_scale_plane).sub(r_scale_width).add(u_scale_height);
 
     Vector3D top_left = VecAddition(Scaled_Vector_l,VectorFromPoint(pos),1);
     top_left=VecAddition(top_left,Scaled_Vector_r,-1);
@@ -1222,7 +1197,6 @@ void capture()
     Vector3D  Scaled_Vector_r_du = Scale(VectorFromPoint(r),0.5*du);
     Vector3D Scaled_Vector_u_dv = Scale(VectorFromPoint(u),0.5*dv);
 
-   // top_left = top_left.add(r_scale_du).sub(u_scale_dv);
 
     top_left=VecAddition(top_left,Scaled_Vector_r_du,1);
     top_left=VecAddition(top_left,Scaled_Vector_u_dv,-1);
@@ -1235,13 +1209,6 @@ void capture()
         for(int j=0;j<Windowheight;j++)
         {
             tMin = large_value;
-
-         //   r_scale_du = r.scale(i*du);
-          //  u_scale_dv = u.scale(j*dv);
-
-            //Point current_pixel = top_left.add(r_scale_du).sub(u_scale_dv);
-
-            //current_pixel.print();
 
             Vector3D curr_pixel=VecAddition(top_left,Scale(VectorFromPoint(r),i*du),1);
             curr_pixel=VecAddition(curr_pixel,Scale(VectorFromPoint(u),j*dv),-1);
@@ -1269,20 +1236,24 @@ void capture()
             {
                 tMin = objects[nearest]->intersect(ray , color , 1);
 
-                image.set_pixel(i,j,color[0]*255,color[1]*255,color[2]*255);
+                color[0]*=255;
+                color[1]*=255;
+                color[2]*=255;
+
+
+                image.set_pixel(i,j,color[0],color[1],color[2]);
             }
         }
     }
 
 
 
-    //image_count++;
-    string name = "";
-    image.save_image("F:\\Graphics Offlines\\offline 3\\1605022\\out"  + name + ".bmp");
+
+    image.save_image("F:\\Graphics Offlines\\offline 3\\1605022\\out.bmp");
 
     image.clear();
 
-    cout<<"image saved"<<endl;
+    cout<<"hoise"<<endl;
 }
 
 
@@ -1295,6 +1266,7 @@ int main(int argc, char **argv){
 	glutCreateWindow("My OpenGL Program");
 	init();
 	loadData();
+
 
 	glEnable(GL_DEPTH_TEST);	//enable Depth Testing
 

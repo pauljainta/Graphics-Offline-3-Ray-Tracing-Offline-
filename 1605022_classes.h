@@ -360,18 +360,27 @@ class Triangle :public Object
 
             double alpha = dotMultiply(h,d)/a;
 
-            if (alpha < 0.0 || alpha > 1.0)
+            if ( alpha > 1.0)
             {
-                return -1.0;
+                return -1;
+            }
+            if(alpha < 0.0)
+            {
+                return -1;
             }
 
             Vector3D q = crossMultiply(d,e1);
 
             double beta =dotMultiply(ray.dir,q)/a;
 
-            if(beta < 0.0 || (alpha+beta) > 1.0)
+            if(beta < 0.0)
             {
-                return -1.0;
+                return -1;
+            }
+
+            if((alpha+beta) > 1.0)
+            {
+                return -1;
             }
 
             double t = dotMultiply(q,e2)/a;
@@ -438,8 +447,21 @@ class Floor :public Object
 
         for(double var_along_y=reference_point.y ; var_along_y<=floorWidth/2 ; var_along_y+=length)
         {
+            int col = floor((var_along_y - reference_point.y)/length);
             for(double var_along_x=reference_point.x ; var_along_x<=floorWidth/2 ; var_along_x+=length)
             {
+                int row = floor((var_along_x - reference_point.x)/length);
+
+                int rc_checker=(row+col)%2;
+                if(rc_checker!=0)
+                {
+                    setColor(0.3,0.3,0.3);
+
+                }
+                else{
+                    setColor(0.7,0.7,0.7);
+                }
+
 
                 glBegin(GL_QUADS);
                 {
@@ -450,8 +472,8 @@ class Floor :public Object
                     glVertex3f(var_along_x+length , var_along_y , 0);
                 }
                 glEnd();
-                if(color[0]==0.3) setColor(0.7,0.8,0.9);
-                else setColor(0.3,0.4,0.5);
+
+
             }
         }
 
@@ -471,25 +493,31 @@ class Floor :public Object
 
                 Vector3D intersecting_point(ray.start.x + t*ray.dir.x, ray.start.y + t*ray.dir.y, 0);
 
-                if( abs(intersecting_point.y) > floorWidth/2 || abs(intersecting_point.x) > floorWidth/2)
-                    return -1.0;
 
-                int row = floor((intersecting_point.x - reference_point.x)/length);
-                int col = floor((intersecting_point.y - reference_point.y)/length);
 
-                if((row+col)%2 == 0)
+                if(abs(intersecting_point.x) > floorWidth/2)
+                    return -1;
+
+
+                if(abs(intersecting_point.y) > floorWidth/2)
+                        return -1;
+
+                int rowCount = floor((intersecting_point.x - reference_point.x)/length);
+                int colCount = floor((intersecting_point.y - reference_point.y)/length);
+
+                int rc_checker=(rowCount+colCount)%2;
+
+                if(rc_checker != 0)
                 {
-                    for(int i=0;i<3;i++)
-                    {
-                        color[i] = 0.2;
-                    }
+                    color[0]=0.3;
+                    color[1]=0.3;
+                    color[2]=0.3;
                 }
                 else
                 {
-                    for(int i=0;i<3;i++)
-                    {
-                        color[i] = 0.8;
-                    }
+                    color[0]=0.7;
+                    color[1]=0.7;
+                    color[2]=0.7;
                 }
 
                 return t;
@@ -570,101 +598,14 @@ class General :public Object
                  + D*rx*ry + E*ry*rz + F*rz*rx
                  + G*rx + H*ry + I*rz + J;
 
+        color[0]=this->color[0];
+        color[1]=this->color[1];
+        color[2]=this->color[2];
+
 
 
 
         return QuadraticEqnSolution(a,b,c);
-
-
-      /*  double discriminant = b*b - 4*a*c;
-
-
-        if(discriminant < 0.0)
-        {
-            return -1.0;
-        }
-
-        double numerator1 = -b - sqrt(discriminant);
-        double numerator2 = -b + sqrt(discriminant);
-
-        double t1 = numerator1/(2.0 * a);
-        double t2 = numerator2/(2.0 * a);
-
-
-        double t = -1.0;
-
-        if(t1 < 0 && t2 < 0)
-        {
-            return -1.0;
-        }
-
-        if(t1 < 0)
-        {
-            t = t2;
-        }
-
-        if(t2 < 0)
-        {
-            t = t1;
-        }
-
-        if(t1 >= 0 && t2 >= 0)
-        {
-            Point intersecting_point1(rx + t1*dx, ry + t1*dy, rz + t1*dz);
-            Point intersecting_point2(rx + t2*dx, ry + t2*dy, rz + t2*dz);
-
-            Point temp1 = intersecting_point1.sub(reference_point);
-            Point temp2 = intersecting_point2.sub(reference_point);
-
-            if(length > 0)
-            {
-                if(abs(temp1.x) > length && abs(temp2.x) > length)
-                    return -1.0;
-
-                if(abs(temp1.x) > length)
-                    t = t2;
-
-                else if(abs(temp2.x) > length)
-                    t = t1;
-
-                else
-                    t = min(t1, t2);
-            }
-
-            if(width > 0)
-            {
-                if(abs(temp1.y) > width && abs(temp2.y) > width)
-                    return -1.0;
-
-                if(abs(temp1.y) > width)
-                    t = t2;
-
-                else if(abs(temp2.y) > width)
-                    t = t1;
-
-                else
-                    t = min(t1, t2);
-            }
-
-            if(height > 0)
-            {
-                if(abs(temp1.z) > height && abs(temp2.z) > height)
-                    return -1.0;
-
-                if(abs(temp1.z) > height)
-                    t = t2;
-
-                else if(abs(temp2.z) > height)
-                    t = t1;
-
-                else
-                    t = min(t1, t2);
-            }
-        }
-
-        return t;
-
-*/
     }
 
 
