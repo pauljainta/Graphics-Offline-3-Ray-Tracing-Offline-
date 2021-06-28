@@ -1,5 +1,6 @@
 #include<iostream>
 using namespace std;
+
 double QuadraticEqnSolution(double a,double b,double c)
 {
 
@@ -43,7 +44,20 @@ struct Vector3D
         y=yy;
         z=zz;
     }
+
+
 };
+
+Vector3D Scale(Vector3D v,double factor)
+{
+	    Vector3D returnVec;
+
+	    returnVec.x = v.x * factor;
+	    returnVec.y = v.y * factor;
+	    returnVec.z = v.z * factor;
+
+	    return returnVec;
+}
 
 struct Vector3D crossMultiply(struct Vector3D v1,struct Vector3D v2)
 {
@@ -109,6 +123,7 @@ class Ray{
         dir.x=d.x;
         dir.y=d.y;
         dir.z=d.z;
+        dir=normalizeVec(dir);
     }
 
     void setDir(double x,double y,double z)
@@ -117,9 +132,49 @@ class Ray{
         dir.x=x;
         dir.y=y;
         dir.z=z;
+        dir=normalizeVec(dir);
     }
 
 };
+
+class Light{
+    public:
+    Vector3D light_pos;
+    double color[3];
+
+    Light(){};
+
+    void draw()
+    {
+
+        glBegin(GL_POINTS);
+        glColor3f(color[0] ,color[1] ,color[2]);
+
+        glVertex3f(light_pos.x , light_pos.y ,light_pos.z);
+
+        glEnd();
+
+    }
+
+    void printLight()
+    {
+        cout<<"Position"<<endl;
+
+        cout<<light_pos.x<<" "<<light_pos.y<<" "<<light_pos.z<<endl;
+
+        cout<<"Colors"<<endl;
+        for(int i=0;i<3;i++)
+        {
+            cout<<color[i]<<" ";
+        }
+
+
+        cout<<endl;
+    }
+
+};
+
+extern vector<Light> lights;
 
 double dotMultiply(struct Vector3D v1, struct Vector3D v2)
 {
@@ -213,6 +268,7 @@ class Object
    virtual void print(){};
 };
 
+extern vector<Object*> objects;
 
 class Sphere :public Object
 {
@@ -269,7 +325,7 @@ class Sphere :public Object
 
     }
 
-    double intersect(Ray ray,double* color,int r_level)
+    double intersect(Ray ray,double* Objcolor,int r_level)
     {
         Vector3D vector_from_center_to_ray = VecAddition(ray.start,reference_point,-1);
 
@@ -282,12 +338,86 @@ class Sphere :public Object
 
         double c = dotMultiply(vector_from_center_to_ray,vector_from_center_to_ray) - pow(length,2);
 
-        color[0]=this->color[0];
-        color[1]=this->color[1];
-        color[2]=this->color[2];
 
 
-        return QuadraticEqnSolution(a,b,c);
+    //    color[0]=this->color[0];
+    //    color[1]=this->color[1];
+     //   color[2]=this->color[2];
+
+        double t=QuadraticEqnSolution(a,b,c);
+
+
+        if(r_level != 0)
+        {
+
+
+
+           Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
+
+
+
+            Objcolor[0] = this->color[0] * coEfficients[0];
+            Objcolor[1] = this->color[1] * coEfficients[0];
+            Objcolor[2] = this->color[2] * coEfficients[0];
+
+            Vector3D normal_at_intersecting_point=normalizeVec(VecAddition(intersecting_point,reference_point,-1));
+
+
+
+            for(int i=0 ; i<lights.size() ; i++)
+            {
+                Vector3D rs(lights[i].light_pos.x,lights[i].light_pos.y,lights[i].light_pos.z);
+                Vector3D rd=VecAddition(intersecting_point,lights[i].light_pos,-1);
+
+
+                Ray ray1(rs,rd);
+
+
+
+                double current_t = (intersecting_point.x - ray1.start.x) / ray1.dir.x;
+                double* dummy_again = new double[3];
+                bool isObscured = false;
+
+                for(int j=0 ; j<objects.size() ; j++)
+                {
+                    double t_l = 0;
+                    t_l = objects[j]->intersect( ray1, dummy_again , 0);
+
+                    if(t_l > 0 && floor(t_l) < floor(current_t))
+                    {
+                        isObscured = true;
+                        break;
+                    }
+                }
+
+                if(isObscured)
+                {
+                    continue;
+                }
+
+                double lambart_value=dotMultiply(normal_at_intersecting_point,ray1.dir);
+
+
+
+                Vector3D rayr=VecAddition(ray1.dir,Scale(normal_at_intersecting_point,2*lambart_value),-1);
+
+                double phong_value=dotMultiply(rayr,ray.dir);
+
+                Objcolor[0] = Objcolor[0] + lights[i].color[0]*coEfficients[1]*abs(lambart_value)*this->color[0];
+                Objcolor[1] = Objcolor[1] + lights[i].color[1]*coEfficients[1]*abs(lambart_value)*this->color[1];
+                Objcolor[2] = Objcolor[2] + lights[i].color[2]*coEfficients[1]*abs(lambart_value)*this->color[2];
+
+
+
+                Objcolor[0] = Objcolor[0] + lights[i].color[0]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+                Objcolor[1] = Objcolor[1] + lights[i].color[1]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+                Objcolor[2] = Objcolor[2] + lights[i].color[2]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+
+            }
+
+        }
+
+        return t;
 
     }
 
@@ -345,7 +475,7 @@ class Triangle :public Object
         glEnd();
 
     }
-    double intersect(Ray ray,double* color,int l)
+    double intersect(Ray ray,double* Objcolor,int r_level)
     {
         Vector3D e1 = VecAddition(points[1],points[0],-1);
         Vector3D e2 = VecAddition(points[2],points[0],-1);
@@ -355,9 +485,9 @@ class Triangle :public Object
         double a = dotMultiply(h,e1);
 
 
-        color[0]=this->color[0];
-        color[1]=this->color[1];
-        color[2]=this->color[2];
+       // color[0]=this->color[0];
+      //  color[1]=this->color[1];
+      //  color[2]=this->color[2];
 
         if(abs(a)>=0.00001)
         {
@@ -391,13 +521,82 @@ class Triangle :public Object
 
             double t = dotMultiply(q,e2)/a;
 
+
+            if(r_level != 0)
+            {
+
+               Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
+
+
+
+                Objcolor[0] = this->color[0] * coEfficients[0];
+                Objcolor[1] = this->color[1] * coEfficients[0];
+                Objcolor[2] = this->color[2] * coEfficients[0];
+
+                Vector3D normal_at_intersecting_point=normalizeVec(VecAddition(intersecting_point,reference_point,-1));
+
+
+
+                for(int i=0 ; i<lights.size() ; i++)
+                {
+                    Vector3D rs(lights[i].light_pos.x,lights[i].light_pos.y,lights[i].light_pos.z);
+                    Vector3D rd=VecAddition(intersecting_point,lights[i].light_pos,-1);
+
+
+                    Ray ray1(rs,rd);
+
+
+
+                    double current_t = (intersecting_point.x - ray1.start.x) / ray1.dir.x;
+                    double* dummy_again = new double[3];
+                    bool isObscured = false;
+
+                    for(int j=0 ; j<objects.size() ; j++)
+                    {
+                        double t_l = 0;
+                        t_l = objects[j]->intersect( ray1, dummy_again , 0);
+
+                        if(t_l > 0 && floor(t_l) < floor(current_t))
+                        {
+                            isObscured = true;
+                            break;
+                        }
+                    }
+
+                    if(isObscured)
+                    {
+                        continue;
+                    }
+
+                    double lambart_value=dotMultiply(normal_at_intersecting_point,ray1.dir);
+
+
+
+                    Vector3D rayr=VecAddition(ray1.dir,Scale(normal_at_intersecting_point,2*lambart_value),-1);
+
+                    double phong_value=dotMultiply(rayr,ray.dir);
+
+                    Objcolor[0] = Objcolor[0] + lights[i].color[0]*coEfficients[1]*abs(lambart_value)*this->color[0];
+                    Objcolor[1] = Objcolor[1] + lights[i].color[1]*coEfficients[1]*abs(lambart_value)*this->color[1];
+                    Objcolor[2] = Objcolor[2] + lights[i].color[2]*coEfficients[1]*abs(lambart_value)*this->color[2];
+
+
+
+                    Objcolor[0] = Objcolor[0] + lights[i].color[0]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+                    Objcolor[1] = Objcolor[1] + lights[i].color[1]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+                    Objcolor[2] = Objcolor[2] + lights[i].color[2]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+
+                }
+
+            }
+
+
             if(t > 0.00001)
             {
                 return t;
             }
 
             return -1;
-
 
         }
 
@@ -526,6 +725,9 @@ class Floor :public Object
                     color[2]=0.7;
                 }
 
+
+
+
                 return t;
         }
         return -1;
@@ -626,11 +828,11 @@ class General :public Object
                     if(abs(vector_along_ip1_rp.x) > length && abs(vector_along_ip2_rp.x) > length)
                         return -1;
 
-                    if(abs(vector_along_ip1_rp.x) > length)
-                        t = t2;
-
                     else if(abs(vector_along_ip2_rp.x) > length)
                         t = t1;
+
+                    else if(abs(vector_along_ip1_rp.x) > length)
+                        t = t2;
 
                     else
                         t = min(t1, t2);
@@ -641,11 +843,11 @@ class General :public Object
                     if(abs(vector_along_ip1_rp.y) > width && abs(vector_along_ip2_rp.y) > width)
                         return -1;
 
-                    if(abs(vector_along_ip1_rp.y) > width)
-                        t = t2;
-
                     else if(abs(vector_along_ip2_rp.y) > width)
                         t = t1;
+
+                    else if(abs(vector_along_ip1_rp.y) > width)
+                        t = t2;
 
                     else
                         t = min(t1, t2);
@@ -656,7 +858,7 @@ class General :public Object
                     if(abs(vector_along_ip1_rp.z) > height && abs(vector_along_ip2_rp.z) > height)
                         return -1;
 
-                    if(abs(vector_along_ip1_rp.z) > height)
+                    else if(abs(vector_along_ip1_rp.z) > height)
                         t = t2;
 
                     else if(abs(vector_along_ip2_rp.z) > height)
@@ -739,42 +941,7 @@ class General :public Object
 
 };
 
-class Light{
-    public:
-    Vector3D light_pos;
-    double color[3];
 
-    Light(){};
-
-    void draw()
-    {
-
-        glBegin(GL_POINTS);
-        glColor3f(color[0] ,color[1] ,color[2]);
-
-        glVertex3f(light_pos.x , light_pos.y ,light_pos.z);
-
-        glEnd();
-
-    }
-
-    void printLight()
-    {
-        cout<<"Position"<<endl;
-
-        cout<<light_pos.x<<" "<<light_pos.y<<" "<<light_pos.z<<endl;
-
-        cout<<"Colors"<<endl;
-        for(int i=0;i<3;i++)
-        {
-            cout<<color[i]<<" ";
-        }
-
-
-        cout<<endl;
-    }
-
-};
 
 
 

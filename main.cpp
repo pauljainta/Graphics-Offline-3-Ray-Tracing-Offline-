@@ -38,6 +38,9 @@ int level_of_recursion,pixels_along_both_dimensions;
 
 int no_of_objects,light_sources;
 
+double* Objcolor;
+double* dummyColor;
+
 
 
 
@@ -45,17 +48,15 @@ struct point pos,u,l,r;
 
 void capture();
 
-
-Vector3D Scale(Vector3D v,double factor)
+void freeMemory()
 {
-	    Vector3D returnVec;
 
-	    returnVec.x = v.x * factor;
-	    returnVec.y = v.y * factor;
-	    returnVec.z = v.z * factor;
-
-	    return returnVec;
+    delete Objcolor;
+    delete dummyColor;
 }
+
+
+
 
 
 
@@ -390,6 +391,17 @@ void skipNFileLines(int N)
 
 void loadData()
 {
+
+    Object *F;
+    F=new Floor(700,20);
+
+    F->setCoEfficients(0.1,0.2,0.3,0.4);
+    F->setColor(0.3,0.3,0.3);
+
+    F->setShine(7);
+
+    objects.push_back(F);
+
     string object_type;
     string fileLine;
 
@@ -814,15 +826,7 @@ void loadData()
 
     }
 
-    Object *F;
-    F=new Floor(700,20);
 
-    F->setCoEfficients(0.1,0.2,0.3,0.4);
-    F->setColor(0.3,0.3,0.3);
-
-    F->setShine(7);
-
-    objects.push_back(F);
 
 
 
@@ -931,12 +935,12 @@ void capture()
             Ray ray(VectorFromPoint(pos), ray_dir);
             nearest = -1;
 
-            double* color = new double[3];
-            double* dummyColor = new double[3];
+            Objcolor = new double[3];
+            dummyColor = new double[3];
 
             for(int k=0 ; k<objects.size(); k++)
             {
-                t = objects[k]->intersect(ray , dummyColor , 1);
+                t = objects[k]->intersect(ray , dummyColor , 0);
 
                 if(t > 0)
                 {
@@ -950,14 +954,18 @@ void capture()
 
             if(nearest != -1)
             {
-                tMin = objects[nearest]->intersect(ray , color , 1);
+                tMin = objects[nearest]->intersect(ray , Objcolor , 1);
 
-                color[0]*=255;
-                color[1]*=255;
-                color[2]*=255;
+                Objcolor[0]*=255;
+                Objcolor[1]*=255;
+                Objcolor[2]*=255;
 
 
-                image.set_pixel(i,j,color[0],color[1],color[2]);
+                image.set_pixel(i,j,Objcolor[0],Objcolor[1],Objcolor[2]);
+
+                freeMemory();
+
+
             }
         }
     }
@@ -971,6 +979,9 @@ void capture()
 
     cout<<"hoise"<<endl;
 }
+
+
+
 
 
 int main(int argc, char **argv){
