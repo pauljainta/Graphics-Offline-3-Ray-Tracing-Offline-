@@ -3,25 +3,31 @@ using namespace std;
 double QuadraticEqnSolution(double a,double b,double c)
 {
 
-    double discriminant = b*b - 4*a*c;
+         double discriminant = b*b - 4*a*c;
 
-     if (discriminant >= 0)
-     {
-        double n=-b - sqrt(discriminant);
-        if(n>0)
-        {
-            return n/(2*a);
-        }
-        n=-b + sqrt(discriminant);
 
-        if(n>0)
-        {
-            return n/(2*a);
-        }
+         if (discriminant >= 0)
+         {
+            double n1=-b - sqrt(discriminant);
+            double n2=-b + sqrt(discriminant);
 
-     }
 
-     return -1;
+            if(n1>0)
+            {
+                return n1/(2*a);
+            }
+
+            n2=-b + sqrt(discriminant);
+
+            if(n2>0)
+            {
+                return n2/(2*a);
+            }
+
+         }
+
+         return -1;
+
 
 
 }
@@ -578,25 +584,120 @@ class General :public Object
 
     }
 
+
+    double GeneralQuadraticEqnSolution(double a,double b,double c,double rsx,double rsy,double rsz,double rdx,double rdy,double rdz)
+    {
+         double discriminant = b*b - 4*a*c;
+
+
+         if (discriminant >= 0)
+         {
+            double n1=-b - sqrt(discriminant);
+            double n2=-b + sqrt(discriminant);
+
+            double t1 = n1/(2.0 * a);
+            double t2 = n2/(2.0 * a);
+
+            if(t1 < 0 && t2 < 0 )
+            {
+
+                return -1;
+            }
+            if(t1 < 0)
+            {
+                return t2;
+            }
+            else if(t2 < 0)
+            {
+                return t1;
+            }
+            else if(t1 >= 0 && t2 >= 0)
+            {
+                Vector3D intersecting_point1(rsx + t1*rdx, rsy + t1*rdy, rsz + t1*rdz);
+                Vector3D intersecting_point2(rsx + t2*rdx, rsy + t2*rdy, rsz + t2*rdz);
+
+                Vector3D vector_along_ip1_rp = VecAddition(intersecting_point1,reference_point,-1);
+                Vector3D vector_along_ip2_rp = VecAddition(intersecting_point2,reference_point,-1);
+
+                double t=-1;
+
+                if(length > 0)
+                {
+                    if(abs(vector_along_ip1_rp.x) > length && abs(vector_along_ip2_rp.x) > length)
+                        return -1;
+
+                    if(abs(vector_along_ip1_rp.x) > length)
+                        t = t2;
+
+                    else if(abs(vector_along_ip2_rp.x) > length)
+                        t = t1;
+
+                    else
+                        t = min(t1, t2);
+                }
+
+                if(width > 0)
+                {
+                    if(abs(vector_along_ip1_rp.y) > width && abs(vector_along_ip2_rp.y) > width)
+                        return -1;
+
+                    if(abs(vector_along_ip1_rp.y) > width)
+                        t = t2;
+
+                    else if(abs(vector_along_ip2_rp.y) > width)
+                        t = t1;
+
+                    else
+                        t = min(t1, t2);
+                }
+
+                if(height > 0)
+                {
+                    if(abs(vector_along_ip1_rp.z) > height && abs(vector_along_ip2_rp.z) > height)
+                        return -1;
+
+                    if(abs(vector_along_ip1_rp.z) > height)
+                        t = t2;
+
+                    else if(abs(vector_along_ip2_rp.z) > height)
+                        t = t1;
+
+                    else
+                        t = min(t1, t2);
+                }
+
+                return t;
+
+            }
+
+            else cout<<"to eta tmi age bolba na"<<endl;
+
+         }
+
+         return -1;
+
+
+    }
+
     double intersect(Ray ray,double* color,int r_level)
     {
-        double rx = ray.start.x;
-        double ry = ray.start.y;
-        double rz = ray.start.z;
+        double rsx = ray.start.x;
+        double rsy = ray.start.y;
+        double rsz = ray.start.z;
 
-        double dx = ray.dir.x;
-        double dy = ray.dir.y;
-        double dz = ray.dir.z;
+        double rdx = ray.dir.x;
+        double rdy = ray.dir.y;
+        double rdz = ray.dir.z;
 
-        double a = A*dx*dx + B*dy*dy + C*dz*dz + D*dx*dy + E*dy*dz + F*dz*dx;
+        double a = A*rdx*rdx + B*rdy*rdy + C*rdz*rdz + D*rdx*rdy + E*rdy*rdz + F*rdz*rdx;
 
-        double b = 2*(A*rx*dx + B*ry*dy + C*rz*dz)
-                 + D*(rx*dy + ry*dx) + E*(ry*dz + rz*dy) +  F*(rz*dx + rx*dz)
-                 + G*dx + H*dy + I*dz;
+        double b = 2*(A*rsx*rdx + B*rsy*rdy + C*rsz*rdz)
+                 + D*(rsx*rdy + rsy*rdx) + E*(rsy*rdz + rsz*rdy) +  F*(rsz*rdx + rsx*rdz)
+                 + G*rdx + H*rdy + I*rdz;
 
-        double c = A*rx*rx + B*ry*ry + C*rz*rz
-                 + D*rx*ry + E*ry*rz + F*rz*rx
-                 + G*rx + H*ry + I*rz + J;
+        double c = A*rsx*rsx + B*rsy*rsy + C*rsz*rsz
+                 + D*rsx*rsy + E*rsy*rsz + F*rsz*rsx
+                 + G*rsx + H*rsy + I*rsz + J;
 
         color[0]=this->color[0];
         color[1]=this->color[1];
@@ -605,8 +706,10 @@ class General :public Object
 
 
 
-        return QuadraticEqnSolution(a,b,c);
+        return GeneralQuadraticEqnSolution(a,b,c,rsx,rsy,rsz,rdx,rdy,rdz);
     }
+
+
 
 
     void print()
