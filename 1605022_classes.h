@@ -684,7 +684,7 @@ class Floor :public Object
 
     }
 
-   double intersect(Ray ray,double* color,int r_level)
+   double intersect(Ray ray,double* Objcolor,int r_level)
     {
             Vector3D origin(0, 0, 0);
             Vector3D normal(0, 0, 1);
@@ -725,8 +725,73 @@ class Floor :public Object
                     color[2]=0.7;
                 }
 
+                if(r_level != 0)
+                {
+
+                   Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
 
 
+
+                    Objcolor[0] = this->color[0] * coEfficients[0];
+                    Objcolor[1] = this->color[1] * coEfficients[0];
+                    Objcolor[2] = this->color[2] * coEfficients[0];
+
+                    Vector3D normal_at_intersecting_point=normalizeVec(VecAddition(intersecting_point,reference_point,-1));
+
+
+
+                    for(int i=0 ; i<lights.size() ; i++)
+                    {
+                        Vector3D rs(lights[i].light_pos.x,lights[i].light_pos.y,lights[i].light_pos.z);
+                        Vector3D rd=VecAddition(intersecting_point,lights[i].light_pos,-1);
+
+
+                        Ray ray1(rs,rd);
+
+
+
+                        double current_t = (intersecting_point.x - ray1.start.x) / ray1.dir.x;
+                        double* dummy_again = new double[3];
+                        bool isObscured = false;
+
+                        for(int j=0 ; j<objects.size() ; j++)
+                        {
+                            double t_l = 0;
+                            t_l = objects[j]->intersect( ray1, dummy_again , 0);
+
+                            if(t_l > 0 && floor(t_l) < floor(current_t))
+                            {
+                                isObscured = true;
+                                break;
+                            }
+                        }
+
+                        if(isObscured)
+                        {
+                            continue;
+                        }
+
+                        double lambart_value=dotMultiply(normal_at_intersecting_point,ray1.dir);
+
+
+
+                        Vector3D rayr=VecAddition(ray1.dir,Scale(normal_at_intersecting_point,2*lambart_value),-1);
+
+                        double phong_value=dotMultiply(rayr,ray.dir);
+
+                        Objcolor[0] = Objcolor[0] + lights[i].color[0]*coEfficients[1]*abs(lambart_value)*this->color[0];
+                        Objcolor[1] = Objcolor[1] + lights[i].color[1]*coEfficients[1]*abs(lambart_value)*this->color[1];
+                        Objcolor[2] = Objcolor[2] + lights[i].color[2]*coEfficients[1]*abs(lambart_value)*this->color[2];
+
+
+
+                        Objcolor[0] = Objcolor[0] + lights[i].color[0]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+                        Objcolor[1] = Objcolor[1] + lights[i].color[1]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+                        Objcolor[2] = Objcolor[2] + lights[i].color[2]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+
+                    }
+
+                }
 
                 return t;
         }
@@ -868,6 +933,8 @@ class General :public Object
                         t = min(t1, t2);
                 }
 
+
+
                 return t;
 
             }
@@ -881,7 +948,7 @@ class General :public Object
 
     }
 
-    double intersect(Ray ray,double* color,int r_level)
+    double intersect(Ray ray,double* Objcolor,int r_level)
     {
         double rsx = ray.start.x;
         double rsy = ray.start.y;
@@ -901,14 +968,172 @@ class General :public Object
                  + D*rsx*rsy + E*rsy*rsz + F*rsz*rsx
                  + G*rsx + H*rsy + I*rsz + J;
 
-        color[0]=this->color[0];
-        color[1]=this->color[1];
-        color[2]=this->color[2];
+       // color[0]=this->color[0];
+       // color[1]=this->color[1];
+      //  color[2]=this->color[2];
+
+
+        double discriminant = b*b - 4*a*c;
+
+
+         if (discriminant >= 0)
+         {
+            double n1=-b - sqrt(discriminant);
+            double n2=-b + sqrt(discriminant);
+
+            double t1 = n1/(2.0 * a);
+            double t2 = n2/(2.0 * a);
+
+            if(t1 < 0 && t2 < 0 )
+            {
+
+                return -1;
+            }
+            if(t1 < 0)
+            {
+                return t2;
+            }
+            else if(t2 < 0)
+            {
+                return t1;
+            }
+            else if(t1 >= 0 && t2 >= 0)
+            {
+                Vector3D intersecting_point1(rsx + t1*rdx, rsy + t1*rdy, rsz + t1*rdz);
+                Vector3D intersecting_point2(rsx + t2*rdx, rsy + t2*rdy, rsz + t2*rdz);
+
+                Vector3D vector_along_ip1_rp = VecAddition(intersecting_point1,reference_point,-1);
+                Vector3D vector_along_ip2_rp = VecAddition(intersecting_point2,reference_point,-1);
+
+                double t=-1;
+
+                if(length > 0)
+                {
+                    if(abs(vector_along_ip1_rp.x) > length && abs(vector_along_ip2_rp.x) > length)
+                        return -1;
+
+                    else if(abs(vector_along_ip2_rp.x) > length)
+                        t = t1;
+
+                    else if(abs(vector_along_ip1_rp.x) > length)
+                        t = t2;
+
+                    else
+                        t = min(t1, t2);
+                }
+
+                if(width > 0)
+                {
+                    if(abs(vector_along_ip1_rp.y) > width && abs(vector_along_ip2_rp.y) > width)
+                        return -1;
+
+                    else if(abs(vector_along_ip2_rp.y) > width)
+                        t = t1;
+
+                    else if(abs(vector_along_ip1_rp.y) > width)
+                        t = t2;
+
+                    else
+                        t = min(t1, t2);
+                }
+
+                if(height > 0)
+                {
+                    if(abs(vector_along_ip1_rp.z) > height && abs(vector_along_ip2_rp.z) > height)
+                        return -1;
+
+                    else if(abs(vector_along_ip1_rp.z) > height)
+                        t = t2;
+
+                    else if(abs(vector_along_ip2_rp.z) > height)
+                        t = t1;
+
+                    else
+                        t = min(t1, t2);
+                }
+
+                if(r_level != 0)
+                {
+
+                   Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
+
+
+
+                    Objcolor[0] = this->color[0] * coEfficients[0];
+                    Objcolor[1] = this->color[1] * coEfficients[0];
+                    Objcolor[2] = this->color[2] * coEfficients[0];
+
+                    Vector3D normal_at_intersecting_point=normalizeVec(VecAddition(intersecting_point,reference_point,-1));
+
+
+
+                    for(int i=0 ; i<lights.size() ; i++)
+                    {
+                        Vector3D rs(lights[i].light_pos.x,lights[i].light_pos.y,lights[i].light_pos.z);
+                        Vector3D rd=VecAddition(intersecting_point,lights[i].light_pos,-1);
+
+
+                        Ray ray1(rs,rd);
+
+
+
+                        double current_t = (intersecting_point.x - ray1.start.x) / ray1.dir.x;
+                        double* dummy_again = new double[3];
+                        bool isObscured = false;
+
+                        for(int j=0 ; j<objects.size() ; j++)
+                        {
+                            double t_l = 0;
+                            t_l = objects[j]->intersect( ray1, dummy_again , 0);
+
+                            if(t_l > 0 && floor(t_l) < floor(current_t))
+                            {
+                                isObscured = true;
+                                break;
+                            }
+                        }
+
+                        if(isObscured)
+                        {
+                            continue;
+                        }
+
+                        double lambart_value=dotMultiply(normal_at_intersecting_point,ray1.dir);
+
+
+
+                        Vector3D rayr=VecAddition(ray1.dir,Scale(normal_at_intersecting_point,2*lambart_value),-1);
+
+                        double phong_value=dotMultiply(rayr,ray.dir);
+
+                        Objcolor[0] = Objcolor[0] + lights[i].color[0]*coEfficients[1]*abs(lambart_value)*this->color[0];
+                        Objcolor[1] = Objcolor[1] + lights[i].color[1]*coEfficients[1]*abs(lambart_value)*this->color[1];
+                        Objcolor[2] = Objcolor[2] + lights[i].color[2]*coEfficients[1]*abs(lambart_value)*this->color[2];
+
+
+
+                        Objcolor[0] = Objcolor[0] + lights[i].color[0]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+                        Objcolor[1] = Objcolor[1] + lights[i].color[1]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+                        Objcolor[2] = Objcolor[2] + lights[i].color[2]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+
+                    }
+
+                }
+
+                return t;
+
+            }
+
+            else cout<<"to eta tmi age bolba na"<<endl;
+
+         }
+
+         return -1;
 
 
 
 
-        return GeneralQuadraticEqnSolution(a,b,c,rsx,rsy,rsz,rdx,rdy,rdz);
+
     }
 
 
