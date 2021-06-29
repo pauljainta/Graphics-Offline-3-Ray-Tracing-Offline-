@@ -223,7 +223,7 @@ void keyboardListener(unsigned char key, int x,int y){
 		    RotateRU(-1);
 			break;
 
-		case '7':
+		case '0':
             capture();
             break;
 
@@ -918,22 +918,22 @@ void capture()
     top_left=VecAddition(top_left,Scaled_Vector_r_du,1);
     top_left=VecAddition(top_left,Scaled_Vector_u_dv,-1);
 
-    int nearest;
-    double t, tMin;
+    int index_of_nearest_object;
+    double t, minimum_t;
 
     for(int i=0;i<Windowidth;i++)
     {
         for(int j=0;j<Windowheight;j++)
         {
-            tMin = large_value;
+            minimum_t = large_value;
 
             Vector3D curr_pixel=VecAddition(top_left,Scale(VectorFromPoint(r),i*du),1);
             curr_pixel=VecAddition(curr_pixel,Scale(VectorFromPoint(u),j*dv),-1);
 
-            Vector3D ray_dir=VecAddition(curr_pixel,VectorFromPoint(pos),-1);
 
-            Ray ray(VectorFromPoint(pos), ray_dir);
-            nearest = -1;
+
+            Ray ray(VectorFromPoint(pos), VecAddition(curr_pixel,VectorFromPoint(pos),-1));
+            index_of_nearest_object = -1;
 
             Objcolor = new double[3];
             dummyColor = new double[3];
@@ -944,17 +944,17 @@ void capture()
 
                 if(t > 0)
                 {
-                    if(t<tMin)
+                    if(t<minimum_t)
                     {
-                         tMin = t;
-                         nearest = k;
+                         minimum_t = t;
+                         index_of_nearest_object = k;
                     }
                 }
             }
 
-            if(nearest != -1)
+            if(index_of_nearest_object != -1)
             {
-                tMin = objects[nearest]->intersect(ray , Objcolor , 1);
+                minimum_t = objects[index_of_nearest_object]->intersect(ray , Objcolor , 1);
 
                 Objcolor[0]*=255;
                 Objcolor[1]*=255;

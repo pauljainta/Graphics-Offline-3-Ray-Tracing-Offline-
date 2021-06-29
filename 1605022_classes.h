@@ -375,13 +375,13 @@ class Sphere :public Object
 
 
                 double current_t = (intersecting_point.x - ray1.start.x) / ray1.dir.x;
-                double* dummy_again = new double[3];
+                double* dummyColor = new double[3];
                 bool isObscured = false;
 
                 for(int j=0 ; j<objects.size() ; j++)
                 {
                     double t_l = 0;
-                    t_l = objects[j]->intersect( ray1, dummy_again , 0);
+                    t_l = objects[j]->intersect( ray1, dummyColor , 0);
 
                     if(t_l > 0 && floor(t_l) < floor(current_t))
                     {
@@ -548,13 +548,13 @@ class Triangle :public Object
 
 
                     double current_t = (intersecting_point.x - ray1.start.x) / ray1.dir.x;
-                    double* dummy_again = new double[3];
+                    double* dummyColor = new double[3];
                     bool isObscured = false;
 
                     for(int j=0 ; j<objects.size() ; j++)
                     {
                         double t_l = 0;
-                        t_l = objects[j]->intersect( ray1, dummy_again , 0);
+                        t_l = objects[j]->intersect( ray1, dummyColor , 0);
 
                         if(t_l > 0 && floor(t_l) < floor(current_t))
                         {
@@ -694,7 +694,7 @@ class Floor :public Object
             if(abs(dotMultiply(normal,ray.dir)) > 0.000001)
             {
 
-               double t = dotMultiply(normal,VecAddition(origin,ray.start,-1))/dotMultiply(normal,ray.dir);
+                double t = dotMultiply(normal,VecAddition(origin,ray.start,-1))/dotMultiply(normal,ray.dir);
 
                 Vector3D intersecting_point(ray.start.x + t*ray.dir.x, ray.start.y + t*ray.dir.y, 0);
 
@@ -751,13 +751,13 @@ class Floor :public Object
 
 
                         double current_t = (intersecting_point.x - ray1.start.x) / ray1.dir.x;
-                        double* dummy_again = new double[3];
+                        double* dummyColor = new double[3];
                         bool isObscured = false;
 
                         for(int j=0 ; j<objects.size() ; j++)
                         {
                             double t_l = 0;
-                            t_l = objects[j]->intersect( ray1, dummy_again , 0);
+                            t_l = objects[j]->intersect( ray1, dummyColor , 0);
 
                             if(t_l > 0 && floor(t_l) < floor(current_t))
                             {
@@ -1078,13 +1078,13 @@ class General :public Object
 
 
                         double current_t = (intersecting_point.x - ray1.start.x) / ray1.dir.x;
-                        double* dummy_again = new double[3];
+                        double* dummyColor = new double[3];
                         bool isObscured = false;
 
                         for(int j=0 ; j<objects.size() ; j++)
                         {
                             double t_l = 0;
-                            t_l = objects[j]->intersect( ray1, dummy_again , 0);
+                            t_l = objects[j]->intersect( ray1, dummyColor , 0);
 
                             if(t_l > 0 && floor(t_l) < floor(current_t))
                             {
