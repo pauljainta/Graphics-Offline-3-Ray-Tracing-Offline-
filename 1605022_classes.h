@@ -352,7 +352,7 @@ class Sphere :public Object
 
 
 
-           Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
+            Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
 
 
 
@@ -412,6 +412,47 @@ class Sphere :public Object
                 Objcolor[0] = Objcolor[0] + lights[i].color[0]*coEfficients[2]* pow(abs(phong_value) , this->shine);
                 Objcolor[1] = Objcolor[1] + lights[i].color[1]*coEfficients[2]* pow(abs(phong_value) , this->shine);
                 Objcolor[2] = Objcolor[2] + lights[i].color[2]*coEfficients[2]* pow(abs(phong_value) , this->shine);
+
+
+                //reflection er suru
+
+
+
+
+
+                Vector3D dir_of_reflection=VecAddition(ray.dir,Scale(normal_at_intersecting_point,2*dotMultiply(normal_at_intersecting_point,ray.dir)),-1);
+
+                Ray reflected_ray(VecAddition(intersecting_point,dir_of_reflection,1),dir_of_reflection);
+
+
+
+
+
+
+                int index_of_nearest_object = -1;
+                double current_t2 , minimum_t = large_value;
+
+                double* reflected_color = new double[3];
+                double* dummyColor2 = new double[3];
+
+                for(int j=0 ; j<objects.size() ; j++)
+                {
+                    current_t2 = objects[j]->intersect(reflected_ray , dummyColor2 , 0);
+                    if(current_t2 > 0 && current_t2 < minimum_t)
+                    {
+                        minimum_t = current_t2;
+                        index_of_nearest_object = j;
+                    }
+                }
+
+                if(index_of_nearest_object != -1)
+                {
+                    minimum_t = objects[index_of_nearest_object]->intersect(reflected_ray , reflected_color , r_level+1);
+
+                    Objcolor[0] = Objcolor[0] + reflected_color[0]*coEfficients[3];
+                    Objcolor[1] = Objcolor[1] + reflected_color[1]*coEfficients[3];
+                    Objcolor[2] = Objcolor[2] + reflected_color[2]*coEfficients[3];
+                }
 
             }
 
