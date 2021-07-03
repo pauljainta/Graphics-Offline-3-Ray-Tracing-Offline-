@@ -1,9 +1,15 @@
 
 #include<iostream>
+#include <algorithm>
 using namespace std;
 
 double QuadraticEqnSolution(double a,double b,double c)
 {
+         if(a==0)
+         {
+            if(-2*b>0) return 0;
+            else return -2*b;
+         }
 
          double discriminant = b*b - 4*a*c;
 
@@ -352,6 +358,7 @@ class Sphere :public Object
         {
 
 
+            if(t==-1) return -1;
 
             Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
 
@@ -381,8 +388,7 @@ class Sphere :public Object
 
                 for(int j=0 ; j<objects.size() ; j++)
                 {
-                    double t_l = 0;
-                    t_l = objects[j]->intersect( ray1, dummyColor , 0);
+                    double t_l = objects[j]->intersect( ray1, dummyColor , 0);
 
                     if(t_l > 0 && floor(t_l) < floor(current_t))
                     {
@@ -580,6 +586,8 @@ class Triangle :public Object
             if(r_level != 0)
             {
 
+                if(t==-1) return -1;
+
                Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
 
 
@@ -588,7 +596,9 @@ class Triangle :public Object
                 Objcolor[1] = this->color[1] * coEfficients[0];
                 Objcolor[2] = this->color[2] * coEfficients[0];
 
-                Vector3D normal_at_intersecting_point=normalizeVec(VecAddition(intersecting_point,reference_point,-1));
+                Vector3D normal_at_intersecting_point=normalizeVec(crossMultiply(e1,e2));
+
+            //    Vector3D normal_at_intersecting_point=normalizeVec(VecAddition(intersecting_point,reference_point,-1));
 
 
 
@@ -608,8 +618,7 @@ class Triangle :public Object
 
                     for(int j=0 ; j<objects.size() ; j++)
                     {
-                        double t_l = 0;
-                        t_l = objects[j]->intersect( ray1, dummyColor , 0);
+                        double t_l = objects[j]->intersect( ray1, dummyColor , 0);
 
                         if(t_l > 0 && floor(t_l) < floor(current_t))
                         {
@@ -831,6 +840,7 @@ class Floor :public Object
 
                 if(r_level != 0)
                 {
+                    if(t==-1) return -1;
 
                    Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
 
@@ -840,7 +850,7 @@ class Floor :public Object
                     Objcolor[1] = this->color[1] * coEfficients[0];
                     Objcolor[2] = this->color[2] * coEfficients[0];
 
-                    Vector3D normal_at_intersecting_point=normalizeVec(VecAddition(intersecting_point,reference_point,-1));
+                    Vector3D normal_at_intersecting_point=normal;
 
 
 
@@ -860,8 +870,7 @@ class Floor :public Object
 
                         for(int j=0 ; j<objects.size() ; j++)
                         {
-                            double t_l = 0;
-                            t_l = objects[j]->intersect( ray1, dummyColor , 0);
+                            double t_l = objects[j]->intersect( ray1, dummyColor , 0);
 
                             if(t_l > 0 && floor(t_l) < floor(current_t))
                             {
@@ -1205,6 +1214,7 @@ class General :public Object
 
                 if(r_level != 0)
                 {
+                    if(t==-1) return -1;
 
                    Vector3D intersecting_point=VecAddition(ray.start,Scale(ray.dir,t),1);
 
@@ -1214,7 +1224,16 @@ class General :public Object
                     Objcolor[1] = this->color[1] * coEfficients[0];
                     Objcolor[2] = this->color[2] * coEfficients[0];
 
-                    Vector3D normal_at_intersecting_point=normalizeVec(VecAddition(intersecting_point,reference_point,-1));
+                    double del_x=2*A*intersecting_point.x + D*intersecting_point.y + E*intersecting_point.z + G;
+
+                    double del_y=2*B*intersecting_point.y + D*intersecting_point.x + F*intersecting_point.z + H;
+
+                    double del_z=2*C*intersecting_point.z + E*intersecting_point.x + F*intersecting_point.y + I;
+
+
+                    Vector3D normal_at_intersecting_point(del_x,del_y,del_z);
+
+                    normal_at_intersecting_point=normalizeVec(normal_at_intersecting_point);
 
 
 
@@ -1234,8 +1253,7 @@ class General :public Object
 
                         for(int j=0 ; j<objects.size() ; j++)
                         {
-                            double t_l = 0;
-                            t_l = objects[j]->intersect( ray1, dummyColor , 0);
+                            double t_l = objects[j]->intersect( ray1, dummyColor , 0);
 
                             if(t_l > 0 && floor(t_l) < floor(current_t))
                             {

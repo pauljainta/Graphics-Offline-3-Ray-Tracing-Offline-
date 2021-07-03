@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1625291030 source:c:\users\jainta paul\desktop\1605022\main.cpp
+1625313764 source:c:\users\jainta paul\desktop\1605022\main.cpp
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -31,6 +31,7 @@
 	<limits>
 	<string>
 
-1625292550 c:\users\jainta paul\desktop\1605022\1605022_header.h
+1625324382 c:\users\jainta paul\desktop\1605022\1605022_header.h
 	<iostream>
+	<algorithm>
 

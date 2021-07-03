@@ -399,7 +399,7 @@ void loadData()
     cout<<"loading data started"<<endl;
 
     Object *F;
-    F=new Floor(700,20);
+    F=new Floor(1000,20);
 
     F->setCoEfficients(0.4,0.2,0.3,0.4);
     F->setColor(0.3,0.3,0.3);
