@@ -1,0 +1,36 @@
+# depslib dependency file v1.0
+1625291030 source:c:\users\jainta paul\desktop\1605022\main.cpp
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<iostream>
+	<vector>
+	<fstream>
+	<stack>
+	<string>
+	<cstdlib>
+	<time.h>
+	<algorithm>
+	<windows.h>
+	<GL/glut.h>
+	"bitmap_image.hpp"
+	"1605022_Header.h"
+
+1472499032 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
+	<windows.h>
+	<GL/gl.h>
+	<GL/glu.h>
+
+1492200750 c:\users\jainta paul\desktop\1605022\bitmap_image.hpp
+	<algorithm>
+	<cmath>
+	<cstdlib>
+	<fstream>
+	<iostream>
+	<iterator>
+	<limits>
+	<string>
+
+1625292550 c:\users\jainta paul\desktop\1605022\1605022_header.h
+	<iostream>
+
